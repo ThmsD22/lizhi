@@ -1,179 +1,104 @@
 <template>
-  <div class="home-container">
-    <!-- 搜索区域 -->
-    <div class="search-section">
-      <el-input
-        v-model="searchQuery"
-        placeholder="搜索荔枝品种、产区、活动..."
-        class="search-input"
-        :prefix-icon="Search"
-      >
-        <template #append>
-          <el-button type="primary">搜索</el-button>
-        </template>
-      </el-input>
-    </div>
+  <div class="home">
+    <h1>Welcome to the Lychee Culture Showcase</h1>
+    <p>Discover the fascinating world of lychee varieties, their origins, and cultural significance.</p>
 
-    <!-- 轮播图区域 -->
-    <div class="carousel-section">
-      <el-carousel height="400px">
-        <el-carousel-item v-for="item in carouselItems" :key="item.id">
-          <div class="carousel-content" :style="{ backgroundImage: `url(${item.image})` }">
-            <div class="carousel-text">
-              <h2>{{ item.title }}</h2>
-              <p>{{ item.description }}</p>
-            </div>
-          </div>
-        </el-carousel-item>
-      </el-carousel>
+    <h2>Featured Lychee Varieties</h2>
+    <div v-if="isLoading" class="loading">Loading varieties...</div>
+    <div v-if="fetchError" class="error-message">
+      Error fetching varieties: {{ fetchError }}
+      <p><em>(Ensure your Flask backend is running at http://127.0.0.1:5000 and is accessible. You might also need to seed the database with some data.)</em></p>
     </div>
-
-    <!-- 活动推荐区 -->
-    <div class="activities-section">
-      <h2 class="section-title">精彩活动</h2>
-      <el-row :gutter="20">
-        <el-col :span="8" v-for="activity in activities" :key="activity.id">
-          <el-card class="activity-card" :body-style="{ padding: '0px' }">
-            <img :src="activity.image" class="activity-image">
-            <div class="activity-info">
-              <h3>{{ activity.title }}</h3>
-              <p>{{ activity.description }}</p>
-              <el-button type="primary" plain>了解详情</el-button>
-            </div>
-          </el-card>
-        </el-col>
-      </el-row>
+    <div v-if="!isLoading && !fetchError && varieties.length === 0" class="no-data">
+      No lychee varieties found. Data might be unavailable or the backend is not seeded.
     </div>
+    <ul v-if="!isLoading && !fetchError && varieties.length > 0" class="variety-list">
+      <li v-for="variety in varieties" :key="variety.id" class="variety-item">
+        <h3>{{ variety.name }}</h3>
+        <p>{{ variety.description || 'No description available.' }}</p>
+        <img v-if="variety.image_url" :src="variety.image_url" :alt="`Image of ${variety.name}`" class="variety-image"/>
+        <a v-if="variety.video_url" :href="variety.video_url" target="_blank">Watch video</a>
+      </li>
+    </ul>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { Search } from '@element-plus/icons-vue'
+import { ref, onMounted } from 'vue';
+import apiService from '@/services/apiService.js';
 
-const searchQuery = ref('')
+const varieties = ref([]);
+const isLoading = ref(true);
+const fetchError = ref(null);
 
-const carouselItems = ref([
-  {
-    id: 1,
-    title: '粤西荔枝果园美景',
-    description: '探索荔枝之乡的自然风光',
-    image: '/images/carousel/orchard.jpg'
-  },
-  {
-    id: 2,
-    title: '特色品种展示',
-    description: '品味不同品种的独特风味',
-    image: '/images/carousel/varieties.jpg'
-  },
-  {
-    id: 3,
-    title: '荔枝文化节',
-    description: '感受传统与现代的完美融合',
-    image: '/images/carousel/festival.jpg'
+onMounted(async () => {
+  try {
+    isLoading.value = true;
+    fetchError.value = null;
+    // Fetch only a few varieties for the home page, e.g., limit if API supports
+    // For now, it fetches all and we can decide to slice or limit in template if needed
+    const data = await apiService.get('varieties');
+    varieties.value = data;
+  } catch (err) {
+    console.error('Failed to fetch varieties for Home page:', err);
+    fetchError.value = err.message || 'An unexpected error occurred while loading data.';
+  } finally {
+    isLoading.value = false;
   }
-])
-
-const activities = ref([
-  {
-    id: 1,
-    title: '新品种试吃会',
-    description: '体验最新培育的荔枝品种，感受科技与自然的完美结合',
-    image: '/images/activities/tasting.jpg'
-  },
-  {
-    id: 2,
-    title: '荔枝采摘节',
-    description: '亲手采摘新鲜荔枝，体验农家乐趣',
-    image: '/images/activities/picking.jpg'
-  },
-  {
-    id: 3,
-    title: '荔枝文化讲座',
-    description: '深入了解荔枝文化，探索历史渊源',
-    image: '/images/activities/lecture.jpg'
-  }
-])
+});
 </script>
 
 <style scoped>
-.home-container {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.search-section {
-  margin: 20px 0;
-}
-
-.search-input {
-  max-width: 600px;
-  margin: 0 auto;
-  display: block;
-}
-
-.carousel-section {
-  margin: 20px 0;
-}
-
-.carousel-content {
-  height: 100%;
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  align-items: flex-end;
-}
-
-.carousel-text {
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
+.home {
   padding: 20px;
-  width: 100%;
-}
-
-.carousel-text h2 {
-  margin: 0;
-  font-size: 24px;
-}
-
-.carousel-text p {
-  margin: 10px 0 0;
-  font-size: 16px;
-}
-
-.section-title {
   text-align: center;
-  margin: 40px 0 20px;
-  color: var(--el-text-color-primary);
 }
-
-.activity-card {
-  margin-bottom: 20px;
-  transition: transform 0.3s;
+.loading, .error-message, .no-data {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 5px;
 }
-
-.activity-card:hover {
-  transform: translateY(-5px);
+.loading {
+  background-color: #e0e0e0;
 }
-
-.activity-image {
+.error-message {
+  background-color: #ffdddd;
+  color: #d8000c;
+  border: 1px solid #d8000c;
+}
+.error-message p {
+  font-size: 0.9em;
+  color: #555;
+}
+.no-data {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+.variety-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+.variety-item {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 15px;
+  width: 300px; /* Adjust as needed */
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+}
+.variety-item h3 {
+  margin-top: 0;
+  color: #333;
+}
+.variety-image {
   width: 100%;
-  height: 200px;
+  max-height: 200px;
   object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 10px;
 }
-
-.activity-info {
-  padding: 20px;
-}
-
-.activity-info h3 {
-  margin: 0 0 10px;
-  font-size: 18px;
-}
-
-.activity-info p {
-  margin: 0 0 15px;
-  color: var(--el-text-color-secondary);
-  font-size: 14px;
-}
-</style> 
+</style>

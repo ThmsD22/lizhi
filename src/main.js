@@ -14,6 +14,9 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
 }
 
+// Set global API base URL
+app.config.globalProperties.$apiBaseUrl = 'http://127.0.0.1:5000/api';
+
 app.use(createPinia())
 app.use(router)
 app.use(ElementPlus)
