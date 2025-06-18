@@ -1,41 +1,41 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import {createRouter, createWebHistory, createWebHashHistory} from 'vue-router'
 
-const routes = [
-  {
-    path: '/',
-    name: 'Home',
-    component: () => import('../views/Home.vue'),
-    meta: { title: '首页' }
-  },
-  {
-    path: '/varieties',
-    name: 'Varieties',
-    component: () => import('../views/Varieties.vue'),
-    meta: { title: '品种文化' }
-  },
-  {
-    path: '/map',
-    name: 'Map',
-    component: () => import('../views/Map.vue'),
-    meta: { title: '产区地图' }
-  },
-  {
-    path: '/media',
-    name: 'Media',
-    component: () => import('../views/Media.vue'),
-    meta: { title: '视频图文' }
-  },
-  {
-    path: '/brands',
-    name: 'Brands',
-    component: () => import('../views/Brands.vue'),
-    meta: { title: '品牌农户' }
-  }
-]
 
 const router = createRouter({
-  history: createWebHistory(),
-  routes
+    history: createWebHistory(import.meta.env.BASE_URL),
+    server: '127.0.0.1',
+    routes: [
+        {
+            path: '/',
+            name: 'home',
+            // lazy loading: () => import()
+            component: () => import('../views/home/index.vue'),
+        },
+        {
+            path: '/login',
+            name: 'login',
+            component: () => import('../views/login/index.vue'),
+        },
+        {
+            path: '/register',
+            name: 'register',
+            component: () => import('../views/register/index.vue')
+        },
+        {
+            path: '/store',
+            name: 'store',
+            component: () => import('../views/store/index.vue')
+        },
+        {
+            path: '/cart',
+            name: 'cart',
+            component: () => import('../views/cart/index.vue')
+        },{
+            path: '/xiangqing',
+            name: 'xiangqing',
+            component: () => import('../views/xiangqing/index.vue')
+        }
+    ],
 })
 
-export default router 
+export default router
