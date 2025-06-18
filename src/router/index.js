@@ -1,5 +1,6 @@
 import {createRouter, createWebHistory, createWebHashHistory} from 'vue-router'
-
+import LycheeVarieties from '../views/LycheeVarieties.vue'
+import LycheeDetail from '../views/LycheeDetail.vue'
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -34,6 +35,17 @@ const router = createRouter({
             path: '/xiangqing',
             name: 'xiangqing',
             component: () => import('../views/xiangqing/index.vue')
+        },
+        {
+            path: '/lychee-varieties',
+            name: 'LycheeVarieties',
+            component: LycheeVarieties
+        },
+        {
+            path: '/lychee-varieties/:id',
+            name: 'LycheeDetail',
+            component: LycheeDetail,
+            props: true
         }
     ],
 })
